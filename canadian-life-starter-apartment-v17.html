@@ -1,0 +1,476 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Canadian Life Simulator — Starter Apartment V15</title><style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:system-ui,Arial;background:#101827;color:#f4f6ff}#app{width:100%;height:100dvh;min-height:480px;position:relative;overflow:hidden}#scene{position:absolute;inset:0;background:#bfd0df}#scene canvas{display:block;width:100%;height:100%}.hud{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;align-items:flex-start;gap:10px;pointer-events:none}.brand,.wallet{padding:12px 16px;background:#17243be8;border:1px solid #73839a70;border-radius:13px;box-shadow:0 8px 25px #0003}.brand strong{display:block;font-size:14px;letter-spacing:.07em}.brand small{font-size:11px;color:#c2d0e6}.wallet{margin-left:auto;white-space:nowrap;font-weight:750;color:#bbf7d0}.controls{position:absolute;z-index:5;left:12px;bottom:12px;background:#17243be8;border:1px solid #7687a17a;border-radius:13px;padding:10px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 352px)}button,select{font:inherit}button{cursor:pointer;border:1px solid #778bae;border-radius:9px;background:#334866;color:white;padding:9px 12px;font-size:13px;font-weight:650}button:hover{background:#47628b}button:disabled{opacity:.4;cursor:not-allowed}.primary{background:#536eee;border-color:#536eee}.active{background:#1b9c87;border-color:#5be0c1}.panel{position:absolute;right:12px;top:75px;bottom:12px;width:318px;z-index:5;background:#17243bf2;border:1px solid #73839a88;border-radius:17px;box-shadow:0 20px 50px #0007;padding:16px;overflow:auto}.panel h2{margin:0 0 5px;font-size:20px}.muted{color:#bdd0e6;font-size:12px;line-height:1.5}.tabs{display:flex;gap:4px;margin:16px 0 10px}.tabs button{flex:1;padding:8px 4px;font-size:11px}.catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.item{background:#2b3b53;border:1px solid #4b6180;border-radius:12px;padding:10px;min-height:102px;display:flex;flex-direction:column;justify-content:center;text-align:left;gap:3px}.item strong{font-size:13px}.item small{color:#b7d0e8}.emoji{font-size:29px}.item.selected{outline:2px solid #5be0c1;background:#284c55}.label{display:block;font-size:12px;color:#d4e0f2;margin:12px 0 6px}.select{width:100%;padding:10px;background:#f4f7fb;color:#12213a;border:0;border-radius:8px}.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.row button{flex:1}.status{padding:12px;margin-top:14px;border-radius:10px;background:#2a3b54;color:#d9eafd;font-size:12px;line-height:1.5}.help{position:absolute;z-index:3;left:12px;top:82px;max-width:310px;background:#17243bdf;padding:10px 13px;border-radius:12px;color:#f7faff;font-size:12px;pointer-events:none}.mobile-toggle{display:none}.danger{background:#803b4b;border-color:#a35a68}#selectedInfo{min-height:32px;color:#a7f3d0;font-size:12px;margin:7px 0}
+@media(max-width:750px){.brand strong{font-size:11px}.brand small{display:none}.wallet{font-size:12px}.panel{width:min(300px,calc(100% - 16px));right:8px;top:65px;bottom:65px}.panel.hide{display:none}.mobile-toggle{display:block;position:absolute;top:65px;right:8px;z-index:8}.controls{left:8px;right:8px;bottom:8px;max-width:none;padding:6px}.controls button{font-size:11px;padding:7px}.help{top:70px;left:8px;right:110px;max-width:none;font-size:10px}.hud{top:7px;left:8px;right:8px}.brand,.wallet{padding:9px}}
+
+/* Dream room makeover */
+body{font-family:Inter,system-ui,Arial,sans-serif}
+.panel{width:348px;background:linear-gradient(160deg,#1e2946f7,#14223af7);border:1px solid #8b9fd455;box-shadow:0 20px 60px #0008}
+.panel h2{font-size:22px;letter-spacing:-.5px}
+.catalog{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.item{min-height:106px;background:linear-gradient(155deg,#374764,#263950);transition:transform .16s,border-color .16s}
+.item:hover{transform:translateY(-2px);border-color:#b0bfff}
+.item.selected{background:#185d64;border-color:#68ebd9}
+.item .emoji{font-size:31px}
+.tabs{flex-wrap:wrap}.tabs button{flex:1 0 27%;font-size:11px}
+.controls{max-width:calc(100% - 385px);box-shadow:0 10px 30px #0006}
+button:focus-visible,.item:focus-visible{outline:3px solid #f9c76a;outline-offset:2px}
+.guide{font-size:12px;line-height:1.5;color:#d2e5ff;background:#243958;border:1px solid #48658d;padding:10px;border-radius:10px;margin:12px 0}
+.nudge{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}.nudge button{padding:8px}
+.chip{display:inline-block;background:#466b89;border-radius:20px;padding:4px 9px;font-size:11px;color:#d7f3ff}
+@media(max-width:750px){.panel{width:min(330px,calc(100% - 16px))}.controls{max-width:none}}
+
+.section-title{margin:16px 0 8px;font-size:12px;font-weight:900;letter-spacing:.12em;color:#96ecdf;border-top:1px solid #64789a75;padding-top:17px}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.themes button{background:linear-gradient(135deg,#374f74,#243750);padding:11px 6px}
+.note{font-size:11px;color:#c9d8ed;background:#1a344e;border-left:3px solid #80e2d5;padding:9px;border-radius:6px;margin-top:10px;line-height:1.5}
+.select{border:1px solid #9eacc0}.panel{scrollbar-color:#7c93ad #19253c}
+.item{position:relative}.item small{font-weight:700;color:#bff4de}
+@media(max-width:750px){.controls{bottom:6px}.panel{bottom:64px}}
+</style><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script><style>
+.move-pad{position:absolute;z-index:7;bottom:72px;left:14px;width:176px;padding:9px;background:#102640ed;border:1px solid #7caeea;border-radius:14px;box-shadow:0 10px 25px #0007;user-select:none;-webkit-user-select:none;touch-action:none}
+.pad-caption{font-weight:800;font-size:10px;letter-spacing:.05em;text-align:center;color:#f2f8ff;margin-bottom:6px}.pad-caption span{display:block;color:#b4d2fb;font-size:10px;font-weight:500;letter-spacing:0}
+.pad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}.pad-grid button{min-height:42px;padding:4px;border:1px solid #7cb8ff;background:#1475d6;color:white;border-radius:9px;font-size:19px;touch-action:none}.pad-grid #padRotate{background:#344e79}
+@media(max-width:750px){.move-pad{left:8px;bottom:77px;width:150px;padding:6px}.pad-grid button{min-height:40px}.panel:not(.hide){bottom:145px}.controls{max-height:62px;overflow-x:auto;flex-wrap:nowrap}.controls button{flex-shrink:0}.mobile-toggle{display:block}}
+@media(min-width:751px){.panel{max-width:36vw}.controls{left:205px;max-width:calc(100% - 600px)}}
+<style>@media(max-width:750px){.panel{top:62px;bottom:65px}.mobile-toggle{display:block}.controls{overflow-x:auto}.hud .brand small{display:none}}.catalog .item{min-height:96px}.panel #foodStatus{border:1px solid #4b8099}.panel #buyGroceries{min-width:135px}@media(max-width:750px){.panel #cookAction,.panel #eatAction{min-height:45px}}<style>
+.camera-actions button{min-height:44px;flex:1 1 30%}.camera-actions button.current{background:#149d91;border-color:#67ebdd}.explore-pad{position:absolute;left:12px;bottom:84px;z-index:9;width:194px;padding:12px;background:#172b46f0;border:1px solid #73b5f0;border-radius:14px;box-shadow:0 14px 28px #0005;touch-action:none}.explore-pad[hidden]{display:none}.pad-title{text-align:center;font-weight:800;font-size:12px;margin-bottom:8px}.walk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.walk-grid button{font-size:20px;min-height:48px;background:#206cce;touch-action:none}.walk-tip{font-size:10px;color:#d1e7fb;text-align:center;margin-top:8px;line-height:1.3}#app.exploring #movePad{display:none}#app.exploring .controls{display:none}#app.exploring #panel{opacity:.98}@media(max-width:750px){.explore-pad{bottom:12px;left:8px;width:160px;padding:8px}.walk-grid button{min-height:44px}.camera-actions button{font-size:12px;padding:11px 6px}#app.exploring #panel:not(.hide){bottom:65px}#app.exploring .help{display:none}}
+</style></head><body><div id="app"><div id="scene"></div><div class="explore-pad" id="explorePad" hidden><div class="pad-title">🚶 EXPLORE ROOM</div><div class="walk-grid"><span></span><button data-walk="forward" aria-label="Walk forward">▲</button><span></span><button data-walk="left" aria-label="Step left">◀</button><button data-walk="back" aria-label="Walk backward">▼</button><button data-walk="right" aria-label="Step right">▶</button></div><div class="walk-tip">Drag scene to look around · Scroll / pinch to zoom</div></div><header class="hud"><div class="brand"><strong>CANADIAN LIFE SIMULATOR</strong><small>STARTER APARTMENT V17 · EXPLORE & BUILD</small></div><div class="wallet" id="wallet">$5,000 CAD</div></header><div class="help" id="help">Tap furniture in the catalogue to add it immediately. Select an item to move it.</div><button class="mobile-toggle" id="toggle">☰ Furniture</button><aside class="panel" id="panel"><h2>✨ Starter Apartment V17</h2><div class="muted">Explore a four-room home, decorate each room and use furniture for daily activities. Choose a room or shop by category.</div><div class="guide">① Tap a furniture card: the game takes you to its correct room<br>② Select it to see the blue arrows<br>③ Use <b>Select furniture to move</b>, press <b>Move selected</b>, then click the floor<br>④ Rotate, nudge, or delete until it feels perfect</div><div class="section-title">🎥 CAMERA & EXPLORATION</div><div class="row camera-actions"><button id="camExplore" class="primary">🚶 Explore Room</button><button id="camBuild">🛠 Build Mode</button><button id="camWhole">🏠 Whole Apartment</button></div><div class="note" id="cameraHint">Build Mode: select a room, place furniture and drag the blue arrows. Explore Room: look around from inside the room.</div><div class="section-title">🏡 CHOOSE A ROOM</div><select class="select" id="room"><option value="bedroom">🛏️ Bedroom</option><option value="living">🛋️ Living room</option><option value="kitchen">🍳 Kitchen</option><option value="bathroom">🚿 Bathroom</option></select><div class="row"><button id="overview">🏠 View whole apartment</button><button id="showerAction">🚿 Take shower</button></div><div class="status" id="needs">Character hygiene: 35% · Place a shower in the bathroom to use it.</div><div class="section-title">🏠 LIVE IN YOUR HOME</div><div class="guide">Tap an activity after purchasing its furniture. These are gameplay interactions; character animations come later.</div><div class="row"><button id="sleepAction">🛏️ Sleep</button><button id="toiletAction">🚽 Use toilet</button><button id="washAction">🧼 Wash hands</button><button id="drinkAction">💧 Drink water</button></div><div class="status" id="homeStatus">Energy: 55% · Hygiene: 35% · Thirst: 45%</div><div class="section-title">🍳 COOK & EAT</div>
+<div class="note">Buy a stove from Kitchen furniture first. Shop for ingredients, choose a recipe, then cook and eat in your apartment.</div>
+<div class="row"><button id="goKitchen">🍳 Go to kitchen</button><button id="buyGroceries" class="primary">🛒 Groceries · $35</button></div>
+<div class="label">Cook a meal</div><select class="select" id="recipe"><option value="pasta">🍝 Tomato Pasta</option><option value="rice">🍚 Jollof-style Rice</option><option value="eggs">🍳 Eggs & Toast</option></select>
+<div class="row"><button id="cookAction" class="primary">🔥 Cook meal</button><button id="eatAction">🍽️ Eat meal</button></div>
+<div class="status" id="foodStatus" aria-live="polite">Hunger: 40% · Ingredients: 0 · Ready meals: 0</div>
+<div class="tabs"><button data-category="all" class="active">All</button><button data-category="bedroom">Bedroom</button><button data-category="decor">Decor</button><button data-category="gaming">Gaming</button><button data-category="lighting">Lighting</button><button data-category="living">Living</button><button data-category="kitchen">Kitchen</button><button data-category="bathroom">Bathroom</button><button data-category="climate">Climate</button></div><div class="catalog" id="catalog"></div><div class="section-title">🎨 DESIGN YOUR ROOM</div><div class="label">Quick design themes</div>
+<div class="themes"><button data-theme="cozy">☕ Cozy</button><button data-theme="luxury">✨ Luxury</button><button data-theme="creator">💗 Creator</button><button data-theme="gaming">🎮 Gaming</button></div>
+<div class="label">Wall paint</div><select class="select" id="wall"><option value="cream">Warm cream</option><option value="white">Gallery white</option><option value="beige">Soft beige</option><option value="sage">Sage green</option><option value="blue">Sky blue</option><option value="pink">Blush pink</option><option value="grey">Cool grey</option><option value="charcoal">Luxury charcoal</option></select>
+<div class="label">Accent wall</div><select class="select" id="accent"><option value="match">Match walls</option><option value="beige">Warm beige</option><option value="sage">Sage</option><option value="pink">Blush</option><option value="blue">Dusty blue</option><option value="charcoal">Charcoal</option></select>
+<div class="label">Floor material</div><select class="select" id="floor"><option value="wood">Light oak planks</option><option value="dark">Walnut planks</option><option value="grey">Grey stone tiles</option><option value="marble">White marble</option><option value="carpet">Soft cream carpet</option></select>
+<div class="label">Lighting mood</div><select class="select" id="lighting"><option value="day">☀️ Bright daylight</option><option value="cozy">🕯️ Warm cozy</option><option value="modern">🧊 Cool modern</option><option value="evening">🌆 Evening glow</option><option value="luxury">✨ Luxury ambiance</option></select>
+<div class="label">Furniture finish</div><select class="select" id="finish"><option value="natural">Natural / neutral</option><option value="rose">Blush & cream</option><option value="midnight">Midnight gaming</option><option value="sage">Sage & oak</option></select>
+<div class="note">Furniture finishes apply to new items you place. Wall, floor and lighting changes update instantly.</div><div class="label">Select furniture to move</div><select class="select" id="itemPicker" aria-label="Choose placed furniture"><option value="">Choose an item in your room</option></select><div class="label">Selected furniture</div><div id="selectedInfo">Nothing selected</div><div class="row"><button id="moveSelected" class="primary">↔ Move selected</button><button id="rotate">↻ Rotate</button><button id="remove">Remove</button></div><div class="label">Fine position adjustment</div><div class="nudge"><span></span><button data-nudge="0,-0.2">↑</button><span></span><button data-nudge="-0.2,0">←</button><button id="rotateFine">↻ 45°</button><button data-nudge="0.2,0">→</button><span></span><button data-nudge="0,0.2">↓</button><span></span></div><div class="row"><button class="danger" id="reset">Reset room</button></div><div class="status" id="status">Tap furniture to add it automatically to the correct room. To move it later, select it and click Move selected. Your design saves in this browser. Grab furniture to drag it.</div></aside><div class="move-pad" id="movePad" aria-label="Furniture movement controls"><div class="pad-caption">MOVE SELECTED FURNITURE <span>Hold arrows to slide</span></div><div class="pad-grid"><span></span><button data-pad="0,-0.12" aria-label="Move toward back wall">▲</button><span></span><button data-pad="-0.12,0" aria-label="Move left">◀</button><button id="padRotate" aria-label="Rotate furniture">⟳</button><button data-pad="0.12,0" aria-label="Move right">▶</button><span></span><button data-pad="0,0.12" aria-label="Move toward front">▼</button><span></span></div></div><div class="controls"><button id="modeSelect" class="active">↖ Select / Move</button><button id="modePlace">＋ Place Furniture</button><button id="modeMove">↔ Move</button><button id="cancel">✕ Cancel</button><button id="zoomHelp">🖱 Rotate view / Scroll zoom</button></div></div><script type="module">
+import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {TransformControls} from 'three/addons/controls/TransformControls.js';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+const view=document.querySelector('#scene'),status=document.querySelector('#status'),help=document.querySelector('#help');const scene=new THREE.Scene();scene.background=new THREE.Color('#b7cadb');const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;view.append(renderer.domElement);
+const camera=new THREE.PerspectiveCamera(45,1,.1,130);camera.position.set(18,19,21);const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,.5,0);orbit.enableDamping=true;orbit.minDistance=4.2;orbit.maxDistance=35;orbit.maxPolarAngle=Math.PI/2.01;orbit.update();const ambient=new THREE.HemisphereLight(0xffffff,0x6684a1,2.2);scene.add(ambient);const sun=new THREE.DirectionalLight(0xffe8ce,2.7);sun.position.set(-1,8,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-9;sun.shadow.camera.right=9;sun.shadow.camera.top=9;sun.shadow.camera.bottom=-9;scene.add(sun);
+function mat(c,rough=.8){return new THREE.MeshStandardMaterial({color:c,roughness:rough,side:THREE.DoubleSide})}function box(g,w,h,d,c,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m}function cyl(g,rt,rb,h,c,x,y,z){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,24),mat(c));m.position.set(x,y,z);m.castShadow=true;g.add(m);return m}
+const wallColors={cream:0xf3e7d5,white:0xfaf9f6,beige:0xddcbb6,sage:0xc9d8c8,blue:0xc9dcec,pink:0xf0cdd8,grey:0xc0c5cb,charcoal:0x525661},floorColors={wood:0xffffff,dark:0xffffff,grey:0xffffff,marble:0xffffff,carpet:0xffffff};
+function floorTexture(kind){
+ const c=document.createElement('canvas');c.width=512;c.height=512;const q=c.getContext('2d');const color={wood:'#bc926b',dark:'#684b3d',grey:'#abb0b4',marble:'#e9e7e3',carpet:'#d8cbbd'}[kind];q.fillStyle=color;q.fillRect(0,0,512,512);
+ let seed=19;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+ if(kind==='wood'||kind==='dark'){
+  for(let y=0;y<512;y+=64){for(let x=0;x<512;x+=256){let xx=x+(Math.floor(y/64)%2)*128-128;q.fillStyle=`rgba(255,255,255,${rnd()*.08})`;q.fillRect(xx+2,y+2,252,60);q.strokeStyle='rgba(32,22,13,.34)';q.lineWidth=2;q.strokeRect(xx,y,256,64);for(let j=0;j<13;j++){q.strokeStyle=`rgba(33,17,9,${rnd()*.09})`;q.beginPath();q.moveTo(xx+12,y+8+rnd()*47);q.bezierCurveTo(xx+80,y+7+rnd()*45,xx+180,y+7+rnd()*45,xx+244,y+8+rnd()*47);q.stroke()}}}
+ }else if(kind==='grey'||kind==='marble'){for(let v=0;v<=512;v+=128){q.strokeStyle='rgba(60,60,65,.19)';q.lineWidth=3;q.beginPath();q.moveTo(v,0);q.lineTo(v,512);q.moveTo(0,v);q.lineTo(512,v);q.stroke()}if(kind==='marble'){for(let j=0;j<22;j++){q.beginPath();let x=rnd()*512,y=rnd()*512;q.moveTo(x,y);q.bezierCurveTo(x-80,y+30,x+70,y+70,x+200,y+150);q.strokeStyle='rgba(120,123,131,.11)';q.lineWidth=1+rnd()*2;q.stroke()}}}
+ else{for(let j=0;j<14000;j++){q.fillStyle=`rgba(255,255,255,${rnd()*.12})`;q.fillRect(rnd()*512,rnd()*512,1,2)}}
+ const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(3,3);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();return tex;
+}
+const floorMaps=Object.fromEntries(['wood','dark','grey','marble','carpet'].map(k=>[k,floorTexture(k)]));
+const lightingStyles={day:{sky:0xb7cadb,ambient:2.2,sun:2.7,tint:0xffe8ce},cozy:{sky:0xc6b9b4,ambient:1.7,sun:2.1,tint:0xffc48a},modern:{sky:0xb8d2e8,ambient:2.25,sun:2.4,tint:0xd9ecff},evening:{sky:0x8793b9,ambient:1.3,sun:1.75,tint:0xffa775},luxury:{sky:0x788099,ambient:1.7,sun:2.1,tint:0xffd09a}};
+const ROOM_HALF=8;
+const floor=box(scene,16,.18,14,0xffffff,0,-.09,0);floor.material.roughness=.72;
+const back=box(scene,16,3.7,.13,wallColors.cream,0,1.85,-7);
+const left=box(scene,.13,3.7,14,wallColors.cream,-8,1.85,0);
+// The four quadrants each have a separate material and low dividers with doorways.
+const roomZones={bedroom:{minX:-7.6,maxX:-.4,minZ:-6.6,maxZ:-.4,cx:-4,cz:-3.5,name:'Bedroom'},living:{minX:.4,maxX:7.6,minZ:-6.6,maxZ:-.4,cx:4,cz:-3.5,name:'Living room'},kitchen:{minX:-7.6,maxX:-.4,minZ:.4,maxZ:6.6,cx:-4,cz:3.5,name:'Kitchen'},bathroom:{minX:.4,maxX:7.6,minZ:.4,maxZ:6.6,cx:4,cz:3.5,name:'Bathroom'}};
+const zoneFloors={};
+for(const [name,r] of Object.entries(roomZones)){
+ const colors={bedroom:0xf5ecdf,living:0xe8d9c6,kitchen:0xdbe4e6,bathroom:0xdbedea};
+ const m=box(scene,7.85,.025,6.85,colors[name],r.cx,.005,r.cz);m.castShadow=false;zoneFloors[name]=m;
+}
+const dividerColor=0xc8bdb2;
+// Walls are low for a dollhouse view, with gaps suggesting doorways.
+for(const z of [-5.1,-2.05,1.65,4.95])box(scene,.12,.9,2.5,dividerColor,0,.45,z);
+for(const x of [-6.4,-3.3,.25,3.45,6.45])box(scene,2.25,.9,.12,dividerColor,x,.45,0);
+box(scene,2.9,1.65,.055,0xc8e4f2,-4.2,2.25,-6.91);
+for(const x of [-5.7,-2.7])box(scene,.06,1.75,.085,0xffffff,x,2.25,-6.85);
+for(const y of [1.35,3.15])box(scene,3.02,.065,.085,0xffffff,-4.2,y,-6.84);
+// Architectural detail: doorway arches, frames and lintels (decorative; no collision).
+const doorTrim=0xece2d6;
+for(const z of [-1.28,1.26]){
+ box(scene,.16,2.4,.13,doorTrim,0,1.2,z-.75);
+ box(scene,.16,2.4,.13,doorTrim,0,1.2,z+.75);
+ box(scene,.16,.15,1.62,doorTrim,0,2.43,z);
+}
+for(const x of [-1.25,1.25]){
+ box(scene,.13,2.4,.15,doorTrim,x-.76,1.2,0);
+ box(scene,.13,2.4,.15,doorTrim,x+.76,1.2,0);
+ box(scene,1.65,.15,.15,doorTrim,x,2.43,0);
+}
+// Floor-to-wall skirting, decorative spotlights, kitchen extraction hood.
+for(const z of [-6.84,6.84])box(scene,15.6,.105,.085,0xf2eee8,0,.07,z);
+for(const x of [-7.84,7.84])box(scene,.085,.105,13.55,0xf2eee8,x,.07,0);
+box(scene,1.38,.27,.6,0xa2a9af,-4.9,2.5,6.3);
+box(scene,.22,.68,.22,0xbfc4c8,-4.9,2.02,6.27);
+for(const [x,z] of [[-4,-3.4],[4,-3.4],[-4,3.4],[4,3.4]]){
+ let light=new THREE.PointLight(0xffedcb,.38,5);light.position.set(x,3.25,z);scene.add(light);
+}
+// Bathroom shower tiles and backsplash material detail.
+for(let y=.3;y<2.8;y+=.55)box(scene,3.25,.025,.035,0xb1d6d9,4.5,y,6.54);
+// Kitchen backsplash, bathroom tile and trim details.
+box(scene,3.6,.55,.025,0xe1ecec,-4,1.15,6.57);
+box(scene,3.5,.12,.03,0xd5bba2,4,.35,6.57);
+const roomLabels={};
+for(const [name,r] of Object.entries(roomZones)){
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=96;const ctx=canvas.getContext('2d');ctx.clearRect(0,0,512,96);ctx.font='bold 46px Arial';ctx.textAlign='center';ctx.fillStyle='#344a59';ctx.fillText(r.name.toUpperCase(),256,57);const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;
+ const label=new THREE.Mesh(new THREE.PlaneGeometry(2.55,.48),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false}));label.rotation.x=-Math.PI/2;label.position.set(r.cx,.055,r.cz-2.5);scene.add(label);roomLabels[name]=label;
+}
+const ITEMS=[
+{id:'bed',name:'Cozy Bed',cat:'bedroom',price:450,icon:'🛏️',w:2.15,d:2.8},
+{id:'desk',name:'Study Desk',cat:'bedroom',price:180,icon:'🪑',w:1.8,d:.85},
+{id:'wardrobe',name:'Wardrobe',cat:'bedroom',price:300,icon:'🚪',w:1.5,d:.8},
+{id:'nightstand',name:'Bedside Table',cat:'bedroom',price:95,icon:'🗄️',w:.65,d:.65},
+{id:'rug',name:'Soft Area Rug',cat:'decor',price:80,icon:'🧶',w:2,d:1.7},
+{id:'lamp',name:'Floor Lamp',cat:'lighting',price:65,icon:'💡',w:.65,d:.65},
+{id:'plant',name:'Houseplant',cat:'decor',price:50,icon:'🪴',w:.65,d:.65},
+{id:'stool',name:'Accent Stool',cat:'bedroom',price:75,icon:'🪑',w:.7,d:.7},
+{id:'tv',name:'Smart TV & Stand',cat:'gaming',price:520,icon:'📺',w:1.7,d:.65},
+{id:'ps5',name:'Game Console',cat:'gaming',price:400,icon:'🎮',w:.75,d:.65},
+{id:'ringlight',name:'Creator Ring Light',cat:'lighting',price:95,icon:'💍',w:.65,d:.65},
+{id:'led',name:'LED Light Tower',cat:'lighting',price:80,icon:'🌈',w:.4,d:.4},
+{id:'mirror',name:'Full Length Mirror',cat:'decor',price:140,icon:'🪞',w:.8,d:.5},
+{id:'chair',name:'Gaming Chair',cat:'gaming',price:280,icon:'💺',w:.75,d:.8},
+{id:'shelf',name:'Book Shelf',cat:'decor',price:180,icon:'📚',w:1.2,d:.5},
+{id:'vanity',name:'Makeup Vanity',cat:'bedroom',price:235,icon:'💄',w:1.25,d:.7},
+{id:'poster',name:'Wall Art',cat:'decor',price:45,icon:'🖼️',w:.85,d:.3},
+{id:'ottoman',name:'Bouclé Ottoman',cat:'decor',price:110,icon:'☁️',w:.7,d:.7},
+{id:'monitor',name:'Gaming Monitor',cat:'gaming',price:230,icon:'🖥️',w:.85,d:.5},
+{id:'speaker',name:'Bluetooth Speaker',cat:'gaming',price:90,icon:'🔊',w:.5,d:.5}
+,
+{id:'sofa',name:'Modern Sofa',cat:'living',price:580,icon:'🛋️',w:2.55,d:1.1},
+{id:'armchair',name:'Lounge Chair',cat:'living',price:245,icon:'🪑',w:1.0,d:1.0},
+{id:'coffee',name:'Coffee Table',cat:'living',price:140,icon:'☕',w:1.35,d:.7},
+{id:'dining',name:'Dining Table',cat:'kitchen',price:300,icon:'🍽️',w:1.6,d:1.2},
+{id:'diningchair',name:'Dining Chair',cat:'kitchen',price:85,icon:'🪑',w:.6,d:.6},
+{id:'fridge',name:'Refrigerator',cat:'kitchen',price:650,icon:'🧊',w:.8,d:.8},
+{id:'stove',name:'Cooker / Stove',cat:'kitchen',price:430,icon:'🍳',w:.85,d:.75},
+{id:'sink',name:'Kitchen Sink',cat:'kitchen',price:240,icon:'🚰',w:1.1,d:.75},
+{id:'microwave',name:'Microwave',cat:'kitchen',price:120,icon:'♨️',w:.58,d:.45},
+{id:'basecabinet',name:'Kitchen Base Cupboard',cat:'kitchen',price:180,icon:'🗄️',w:1.15,d:.65},
+{id:'wallcabinet',name:'Kitchen Wall Cupboard',cat:'kitchen',price:155,icon:'🗄️',w:1.1,d:.42},
+{id:'pantry',name:'Tall Pantry Cupboard',cat:'kitchen',price:270,icon:'🚪',w:.85,d:.65},
+{id:'dispenser',name:'Water Dispenser',cat:'kitchen',price:190,icon:'💧',w:.6,d:.55},
+{id:'kettle',name:'Electric Kettle',cat:'kitchen',price:55,icon:'🫖',w:.4,d:.4},
+{id:'dishrack',name:'Dish Drying Rack',cat:'kitchen',price:45,icon:'🍽️',w:.65,d:.42},
+{id:'trashbin',name:'Kitchen Trash Bin',cat:'kitchen',price:40,icon:'🗑️',w:.42,d:.42},
+{id:'bathmirror',name:'Bathroom Mirror',cat:'bathroom',price:110,icon:'🪞',w:.72,d:.32},
+{id:'livingmirror',name:'Living Room Mirror',cat:'living',price:210,icon:'🪞',w:1.0,d:.4},
+
+{id:'toilet',name:'Toilet',cat:'bathroom',price:250,icon:'🚽',w:.8,d:1.1},
+{id:'shower',name:'Glass Shower',cat:'bathroom',price:650,icon:'🚿',w:1.5,d:1.5},
+{id:'bathtub',name:'Bathtub',cat:'bathroom',price:900,icon:'🛁',w:1.75,d:.85},
+{id:'bathsink',name:'Bathroom Vanity',cat:'bathroom',price:350,icon:'🧼',w:.9,d:.65},
+{id:'towel',name:'Towel Stand',cat:'bathroom',price:45,icon:'🧻',w:.5,d:.4},
+{id:'bathmat',name:'Bath Mat',cat:'bathroom',price:35,icon:'🟦',w:.9,d:.6},
+{id:'fan',name:'Standing Fan',cat:'climate',price:115,icon:'🌀',w:.75,d:.75},
+{id:'heater',name:'Room Heater',cat:'climate',price:125,icon:'🔥',w:.85,d:.5}];const catalog=document.querySelector('#catalog');let category='all',pending=null,mode='select',selected=null,drag=null,balance=5000;const objects=[];let hunger=40,groceries=0,readyMeals=0,cooking=false;
+// On-object blue X/Z arrows: mouse + touch, same style as a 3D editor.
+const gizmo=new TransformControls(camera,renderer.domElement);
+gizmo.setMode('translate');gizmo.showX=true;gizmo.showY=false;gizmo.showZ=true;gizmo.setSize(window.matchMedia('(pointer: coarse)').matches ? 0.78 : 0.60);gizmo.setSpace('world');
+const gizmoHelper=gizmo.getHelper();scene.add(gizmoHelper);
+// Style the visible axis arrows blue; axis labels remain directional.
+gizmoHelper.traverse(part=>{if(part.isMesh&&part.material){const mats=Array.isArray(part.material)?part.material:[part.material];for(const m of mats){if(m.color&&m.visible!==false)m.color.setHex(0x238cff)}}});
+let gizmoDragging=false,lastGood=null;
+gizmo.addEventListener('mouseDown',()=>{gizmoDragging=true;orbit.enabled=false;lastGood=selected?{x:selected.x,z:selected.z}:null});
+gizmo.addEventListener('objectChange',()=>{if(!selected||!gizmoDragging)return;const x=selected.g.position.x,z=selected.g.position.z;if(within(selected,x,z)&&!collision(selected,x,z)){selected.x=x;selected.z=z;lastGood={x,z}}else if(lastGood){selected.g.position.set(lastGood.x,0,lastGood.z)} });
+gizmo.addEventListener('mouseUp',()=>{gizmoDragging=false;orbit.enabled=true;if(selected){selected.g.position.set(selected.x,0,selected.z);save();tell('Furniture moved with the blue arrows!')}});
+function syncGizmo(){if(selected&&mode==='select')gizmo.attach(selected.g);else gizmo.detach()}
+
+
+// V11 detailed procedural furniture: self-contained, no external furniture assets.
+const PREMIUM_ITEMS=new Set(['bed','desk','wardrobe','plant','tv','chair']);
+function premiumItem(g,type){
+ const cloth=(color,rough=0.94)=>new THREE.MeshStandardMaterial({color,roughness:rough});
+ const metal=(color=0x3a3c44)=>new THREE.MeshStandardMaterial({color,metalness:.66,roughness:.31});
+ const wood=cloth(0xb08b68,.55),walnut=cloth(0x785943,.53),ivory=cloth(0xf1ece4),linen=cloth(0xd5c4b3),navy=cloth(0x839bb6),black=cloth(0x1c2330,.37);
+ function rb(w,h,d,x,y,z,m,r=.055){const geo=new RoundedBoxGeometry(w,h,d,3,Math.min(r,w/3,h/3,d/3));const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;}
+ function cylinder(top,bottom,h,x,y,z,m,n=24){const o=new THREE.Mesh(new THREE.CylinderGeometry(top,bottom,h,n),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;g.add(o);return o;}
+ function sphere(x,y,z,sx,sy,sz,m){const o=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;g.add(o);return o;}
+ function line(points,radius,m){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const o=new THREE.Mesh(new THREE.TubeGeometry(curve,24,radius,6,false),m);o.castShadow=true;g.add(o);return o;}
+ switch(type){
+  case 'bed':{
+   // Upholstered bed with pillows, quilt layers, piping and legs.
+   for(const x of [-.79,.79])for(const z of [-1.08,1.08])cylinder(.065,.065,.23,x,.13,z,walnut);
+   rb(2.1,.26,2.68,0,.37,0,wood,.055);
+   rb(2.06,.32,.24,0,.89,-1.29,linen,.11);rb(2.1,1.16,.22,0,.83,-1.34,linen,.10);
+   for(let x of [-.61,0,.61])rb(.035,.95,.11,x,.84,-1.19,ivory,.015);
+   rb(1.98,.22,2.47,0,.60,.035,ivory,.08);
+   rb(1.94,.12,1.53,0,.76,.45,navy,.045);
+   rb(1.92,.037,.08,0,.825,-.18,cloth(0xe8e3dd),.016);
+   for(let x of [-.49,.49]){rb(.81,.16,.58,x,.8,-.82,ivory,.08);rb(.82,.028,.06,x,.88,-.53,linen,.016)}
+   for(let z of [.12,.31,.50,.69,.88])rb(1.86,.018,.012,0,.835,z,cloth(0xa2b4c5),.005);
+   break;
+  }
+  case 'desk':{
+   rb(1.81,.10,.85,0,1.05,0,wood,.045);
+   for(let x of [-.74,.74])for(let z of [-.31,.31])rb(.055,1.0,.055,x,.53,z,metal(0x31363f),.012);
+   rb(1.51,.11,.46,0,.84,-.12,walnut,.018);
+   rb(.78,.024,.36,.17,1.115,-.10,cloth(0x313642,.58),.012);
+   for(let j=0;j<3;j++)rb(.21,.012,.05,-.06+j*.23,1.134,-.05,cloth(0xd8dbdd),.004);
+   cylinder(.12,.12,.03,-.64,1.13,.26,metal(0xb8a48b));
+   break;
+  }
+  case 'wardrobe':{
+   rb(1.5,2.3,.78,0,1.15,0,wood,.045);
+   rb(.71,2.16,.046,-.365,1.15,.401,ivory,.016);
+   rb(.71,2.16,.046,.365,1.15,.401,linen,.016);
+   rb(.018,2.10,.017,0,1.15,.437,walnut,.004);
+   for(let x of [-.19,.19])rb(.035,.27,.055,x,1.23,.468,metal(0xc4a46b),.01);
+   rb(1.41,.09,.22,0,.085,.01,walnut,.023);
+   break;
+  }
+  case 'plant':{
+   cylinder(.28,.22,.48,0,.26,0,cloth(0xc08062,.66),40);
+   cylinder(.30,.30,.04,0,.50,0,cloth(0x99624a),40);
+   cylinder(.25,.24,.025,0,.52,0,cloth(0x4a3a30),32);
+   line([[0,.53,0],[0,1.16,0],[0,1.57,0]],.046,cloth(0x507450));
+   for(let i=0;i<11;i++){
+     let angle=i*2.39996, yy=.77+(i%6)*.165;
+     let rr=.20+(i%3)*.08, xx=Math.cos(angle)*rr, zz=Math.sin(angle)*rr;
+     line([[0,yy-.15,0],[xx*.48,yy,zz*.48],[xx,yy+.11,zz]],.016,cloth(0x46764a));
+     let leaf=sphere(xx,yy+.11,zz,.115,.31,.078,cloth(i%3===0?0x2b7654:0x4a9968));leaf.rotation.z=-Math.cos(angle)*.65;leaf.rotation.x=Math.sin(angle)*.6;
+     const mid=sphere(xx,yy+.12,zz,.012,.24,.014,cloth(0x9cbb7e));mid.rotation.copy(leaf.rotation);
+   }
+   break;
+  }
+  case 'tv':{
+   rb(1.75,.38,.62,0,.36,0,walnut,.045);
+   rb(1.48,.055,.48,0,.57,0,wood,.01);
+   rb(1.56,.89,.07,0,1.29,-.04,black,.028);
+   rb(1.46,.78,.011,0,1.29,.002,cloth(0x152f46,.24),.012);
+   rb(1.28,.34,.014,0,1.18,.011,cloth(0x305b79,.2),.008);
+   rb(1.47,.024,.035,0,1.715,-.01,metal(0x262a2c),.005);
+   cylinder(.07,.09,.08,0,.77,-.07,metal(0x3b4147));
+   for(let x of [-.62,.62])rb(.045,.19,.05,x,.34,.32,metal(0xc2a078),.012);
+   for(let x of [-.38,.38])rb(.57,.11,.04,x,.33,.324,wood,.014);
+   break;
+  }
+  case 'chair':{
+   rb(.68,.16,.69,0,.63,.07,cloth(0x323a51),.075);
+   rb(.69,.98,.21,0,1.17,-.27,cloth(0x394965),.09);
+   rb(.50,.65,.035,0,1.21,-.142,cloth(0x7889a1),.035);
+   rb(.35,.15,.11,0,1.73,-.26,cloth(0x353b4f),.05);
+   for(let x of [-.38,.38]){rb(.10,.10,.51,x,.85,.025,metal(0x424955),.024);rb(.07,.34,.08,x,.66,.0,metal(0x2a303a),.016);}
+   cylinder(.075,.075,.54,0,.30,.0,metal(0x424b55));
+   for(let a=0;a<5;a++){const t=a*Math.PI*2/5;let xx=Math.cos(t)*.35,zz=Math.sin(t)*.35;const foot=rb(.43,.046,.075,xx/2,.09,zz/2,metal(0x343945),.018);foot.rotation.y=-t; cylinder(.066,.07,.06,xx,.045,zz,black);}
+   break;
+  }
+ }
+}
+
+function makeItem(type,x,z,rot=0){let g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);const a=(...args)=>box(g,...args);if(PREMIUM_ITEMS.has(type)){premiumItem(g,type)}else switch(type){case 'bed':a(2.1,.28,2.65,0x926a4c,0,.27,0);a(2,.19,2.53,0xf9f8f3,0,.51,0);a(2.13,1.05,.13,0xb3a08f,0,.75,-1.27);a(1.95,.09,1.45,0x729bb0,0,.67,.54);a(.82,.17,.54,0xffffff,-.51,.72,-.75);a(.82,.17,.54,0xffffff,.51,.72,-.75);break;case 'desk':a(1.8,.13,.85,0xb78557,0,1.07,0);for(let i of [-.7,.7])for(let j of [-.29,.29])a(.09,1,.09,0x555c62,i,.53,j);a(.9,.05,.4,0x3f4c58,0,1.15,0);break;case 'wardrobe':a(1.5,2.28,.78,0xd6b698,0,1.14,0);a(.025,2.07,.69,0x947b63,0,1.12,.41);a(.04,.23,.04,0xe1d6c2,-.12,1.18,.43);a(.04,.23,.04,0xe1d6c2,.12,1.18,.43);break;case 'nightstand':a(.67,.58,.63,0xc39a72,0,.29,0);a(.55,.22,.04,0xb38864,0,.33,.33);a(.16,.04,.035,0xffeac5,0,.36,.36);break;case 'rug':a(2,.025,1.7,0xd7aba2,0,.02,0);for(let i=-3;i<=3;i++)a(.025,.027,1.55,0xf0ddd2,i*.25,.04,0);break;case 'lamp':cyl(g,.27,.28,.13,0x4d5359,0,.08,0);cyl(g,.045,.045,1.46,0x9d9d9a,0,.84,0);cyl(g,.23,.41,.48,0xf9e0ad,0,1.79,0);break;case 'plant':cyl(g,.3,.23,.48,0xb97655,0,.27,0);cyl(g,.06,.06,.95,0x38674c,0,.96,0);for(let k=0;k<7;k++){let l=new THREE.Mesh(new THREE.SphereGeometry(.26,12,10),mat(0x3b8a59));const t=k*2*Math.PI/7;l.position.set(Math.cos(t)*.22,1.3+Math.sin(k)*.13,Math.sin(t)*.22);l.scale.set(.85,1.5,.55);g.add(l)}break;case 'stool':cyl(g,.34,.34,.15,0xc0a38f,0,.54,0);for(let k=0;k<4;k++){let xx=k%2?.23:-.23,zz=k<2?.23:-.23;a(.09,.52,.09,0x705949,xx,.26,zz)}break;
+case 'tv':a(1.75,.5,.55,0xb39a7e,0,.34,0);a(1.5,.82,.08,0x101828,0,1.12,-.08);a(1.35,.67,.02,0x233a50,0,1.12,-.025);a(.2,.08,.27,0x202535,0,.66,-.2);break;
+case 'ps5':a(.7,.46,.56,0x5b6572,0,.25,0);a(.29,.49,.11,0xf1f2f6,0,.54,-.07);a(.18,.45,.07,0x222432,0,.55,-.03);a(.24,.08,.16,0x1d2435,.17,.56,.19);break;
+case 'ringlight':cyl(g,.25,.25,.07,0x44404a,0,.055,0);cyl(g,.025,.025,1.58,0x393b43,0,.85,0);{let ring=new THREE.Mesh(new THREE.TorusGeometry(.33,.048,12,42),new THREE.MeshStandardMaterial({color:0xffe7c6,emissive:0xffd4ae,emissiveIntensity:1.6}));ring.position.y=1.78;g.add(ring)}break;
+case 'led':a(.29,.08,.29,0x33313f,0,.04,0);a(.11,1.7,.11,0x5c40fa,0,.93,0);{let led=new THREE.PointLight(0x8b60ff,1.8,2.5);led.position.y=1.25;g.add(led)}break;
+case 'mirror':a(.85,1.75,.12,0xd6bb86,0,1.1,0);a(.72,1.59,.04,0xa1ccd8,0,1.1,.085);a(.1,.5,.25,0xb8976e,0,.25,0);break;
+case 'chair':a(.66,.19,.6,0x272b43,0,.63,.08);a(.68,.88,.16,0x4b5685,0,1.15,-.25);a(.12,.65,.12,0x373844,0,.34,0);for(let i of [-.25,.25])a(.48,.06,.09,0x272b34,i,.12,0);break;
+case 'shelf':a(1.15,2.04,.43,0xb49a7b,0,1.02,0);for(let y of [.33,.8,1.27,1.74])a(1.12,.065,.47,0x755f4b,0,y,.05);for(let k=0;k<12;k++)a(.06,.24,.26,[0xcf886c,0x5f9c91,0xf6c974,0x8d81b7][k%4],-.45+(k%4)*.29,.47+Math.floor(k/4)*.46,.07);break;
+case 'vanity':a(1.25,.12,.61,0xddbdad,0,.77,0);for(let xx of [-.5,.5])a(.07,.7,.08,0xb48970,xx,.39,0);a(.78,.85,.08,0xe8c5b7,0,1.35,-.17);a(.65,.73,.025,0xc0dce2,0,1.35,-.11);break;
+case 'poster':a(.85,1.18,.09,0xd5a66c,0,1.18,0);a(.74,1.07,.035,0x637f9b,0,1.18,.06);a(.4,.46,.038,0xffbf91,0,1.25,.086);break;
+case 'ottoman':cyl(g,.36,.36,.39,0xe1cebd,0,.23,0);break;
+case 'monitor':a(.78,.46,.06,0x191c28,0,1.04,0);a(.7,.38,.02,0x27465b,0,1.04,.04);a(.06,.47,.06,0x555e68,0,.58,0);a(.35,.04,.3,0x444956,0,.34,0);break;
+case 'speaker':a(.35,.7,.34,0x1b2636,0,.37,0);cyl(g,.10,.10,.025,0x4f7097,0,.52,.18);cyl(g,.065,.065,.025,0x4f7097,0,.24,.18);break;
+case 'sofa':a(2.5,.36,1.05,0xdbc8b4,0,.44,0);a(2.5,.72,.22,0xc7ad9e,0,.88,-.42);for(const x of [-1.15,1.15])a(.20,.56,1,0xc7ad9e,x,.68,0);for(const x of [-.75,0,.75])a(.7,.12,.77,0xf1e5d8,x,.68,.08);break;
+case 'armchair':a(.9,.3,.9,0xe2d0be,0,.5,0);a(.9,.8,.17,0xc7aea2,0,1,-.35);for(const x of [-.41,.41])a(.14,.5,.75,0xd2b6a7,x,.8,.08);break;
+case 'coffee':a(1.35,.1,.7,0xa77f61,0,.48,0);for(const x of [-.54,.54])for(const z of [-.23,.23])a(.09,.44,.09,0x514336,x,.23,z);break;
+case 'dining':a(1.6,.11,1.2,0xc39c78,0,.78,0);for(const x of [-.65,.65])for(const z of [-.45,.45])a(.075,.74,.075,0x77716f,x,.37,z);break;
+case 'diningchair':a(.5,.1,.55,0xd4b49e,0,.51,0);a(.5,.6,.09,0xc9a38e,0,.9,-.24);for(const x of [-.20,.20])for(const z of [-.20,.20])a(.05,.47,.05,0x625b59,x,.23,z);break;
+case 'fridge':a(.8,2,.78,0xd8e2e6,0,1,0);a(.72,.018,.02,0x627786,0,1.02,.4);a(.035,.32,.04,0x65747a,.3,1.42,.43);a(.035,.32,.04,0x65747a,.3,.70,.43);break;
+case 'stove':a(.84,.83,.73,0xe4e4df,0,.42,0);a(.81,.08,.73,0x31363b,0,.88,0);for(const x of [-.21,.21])for(const z of [-.2,.2])cyl(g,.13,.13,.018,0x5a6064,x,.93,z);a(.57,.36,.035,0x272f39,0,.43,.385);break;
+case 'sink':a(1.1,.86,.72,0xc3b29f,0,.43,0);a(1,.08,.67,0xedebe5,0,.9,0);a(.57,.035,.40,0x728b93,0,.95,.02);cyl(g,.025,.025,.32,0x9ea9ae,0,1.12,-.18);break;
+case 'microwave':a(.6,.38,.4,0xdedfe2,0,.21,0);a(.42,.24,.02,0x344959,-.055,.24,.21);break;
+case 'basecabinet':a(1.13,.84,.62,0xd8c5ac,0,.43,0);a(1.18,.08,.68,0xe5e1d8,0,.89,0);for(const xx of [-.285,.285]){a(.55,.68,.035,0xbca68e,xx,.43,.33);a(.027,.18,.035,0xb9bec4,xx+.14,.48,.355)}a(1.08,.055,.055,0xa99b88,0,.09,.33);break;
+case 'wallcabinet':a(1.08,.72,.4,0xd6c1a8,0,1.85,0);for(const xx of [-.27,.27]){a(.51,.61,.035,0xbca68e,xx,1.85,.22);a(.026,.15,.036,0xc6c9ca,xx+.12,1.84,.25)}break;
+case 'pantry':a(.82,2.25,.62,0xd5c0a9,0,1.13,0);a(.74,1.06,.035,0xbba48d,0,1.7,.33);a(.74,1.03,.035,0xbba48d,0,.57,.33);a(.032,.22,.045,0xd4d4d0,.27,1.65,.36);a(.032,.22,.045,0xd4d4d0,.27,.62,.36);break;
+case 'dispenser':a(.53,.96,.51,0xf1f3f1,0,.50,0);a(.45,.32,.4,0xd9e6ea,0,1.14,0);cyl(g,.21,.21,.58,0x95cde1,0,1.53,0);a(.2,.14,.09,0x526a77,0,.92,.28);a(.1,.055,.06,0x4aa2d0,-.1,.97,.33);a(.1,.055,.06,0xe56562,.1,.97,.33);break;
+case 'kettle':cyl(g,.19,.23,.37,0xc7d0d4,0,.23,0);a(.2,.07,.12,0x45494e,0,.46,0);{let handle=new THREE.Mesh(new THREE.TorusGeometry(.18,.045,10,24,Math.PI),mat(0x414750));handle.position.set(.18,.29,0);handle.rotation.z=Math.PI/2;g.add(handle)}break;
+case 'dishrack':a(.67,.06,.43,0xaab0b1,0,.08,0);for(let k=-2;k<=2;k++){a(.035,.32,.3,0xc5d2d5,k*.11,.23,0)}break;
+case 'trashbin':cyl(g,.20,.19,.55,0x7f8c92,0,.29,0);cyl(g,.23,.23,.05,0xbac1c1,0,.58,0);break;
+case 'bathmirror':a(.79,1.13,.085,0xc3d0d2,0,1.62,0);a(.69,1.02,.022,0x9dd1db,0,1.62,.052);a(.10,.04,.08,0xe8e8e3,0,1.03,.04);break;
+case 'livingmirror':a(1.03,1.91,.1,0xbc925d,0,1.23,0);a(.89,1.76,.022,0x9ab8bf,0,1.23,.062);a(.7,.08,.23,0x765f4e,0,.19,0);break;
+
+case 'toilet':a(.61,.37,.76,0xf5f5f5,0,.38,.16);cyl(g,.34,.34,.18,0xf5f5f5,0,.58,.26);a(.65,.77,.24,0xf3f4f4,0,.82,-.33);a(.69,.10,.25,0xffffff,0,1.25,-.33);break;
+case 'shower':a(1.48,.095,1.48,0xd7e8ec,0,.055,0);for(const x of [-.71,.71])a(.04,2.05,1.45,0x9fb8c1,x,1.09,0);for(const z of [-.72,.72])a(1.45,2.05,.035,0x9fb8c1,0,1.09,z);a(.065,1.68,.03,0x6f929c,.47,1.0,.73);cyl(g,.08,.08,.65,0xa1aeb4,-.44,1.58,-.55);cyl(g,.24,.24,.05,0xbfcad0,-.44,1.93,-.55);break;
+case 'bathtub':a(1.75,.62,.85,0xe5eced,0,.34,0);a(1.52,.07,.67,0x93bdc9,0,.66,0);break;
+case 'bathsink':a(.9,.85,.65,0xc9b6a6,0,.43,0);a(.9,.12,.65,0xffffff,0,.9,0);cyl(g,.05,.05,.22,0x95a3ac,0,1.07,-.19);a(.6,.75,.045,0xa6cad5,0,1.65,-.23);break;
+case 'towel':cyl(g,.075,.075,1.08,0xa0a5aa,0,.56,0);a(.52,.055,.06,0xa0a5aa,0,1.05,0);a(.45,.35,.08,0xcad6d1,0,.88,.05);break;
+case 'bathmat':a(.9,.025,.6,0x92c1be,0,.02,0);break;
+case 'fan':cyl(g,.27,.27,.08,0x555a60,0,.04,0);cyl(g,.035,.035,1.30,0x7e858a,0,.68,0);cyl(g,.39,.39,.09,0x7c8a95,0,1.43,0);for(let i=0;i<4;i++){const blade=a(.13,.44,.035,0xc1d1d8,0,1.61,0);blade.rotation.z=i*Math.PI/2;blade.position.set(Math.sin(i*Math.PI/2)*.22,1.43+Math.cos(i*Math.PI/2)*.22,.06)}break;
+case 'heater':a(.82,.65,.35,0xd4dbdf,0,.4,0);for(let i=-3;i<=3;i++)a(.055,.47,.025,0x73808a,i*.1,.44,.19);for(const x of [-.27,.27])a(.11,.06,.35,0x535b61,x,.06,0);break;
+
+}const meta=ITEMS.find(i=>i.id===type);let item={id:Date.now()+Math.random(),type,g,x,z,rot,w:meta.w,d:meta.d};g.userData.item=item;g.traverse(o=>o.userData.item=item);
+const finish=document.querySelector('#finish').value;
+if(finish!=='natural'){
+ const palettes={rose:[0xe6b9b7,0xfff3e7],midnight:[0x293950,0x647e9d],sage:[0xa4b5a0,0xe5d9bf]};
+ let n=0;g.traverse(o=>{if(o.isMesh&&o.material&&o.material.color){const original=o.material.color;const brightness=(original.r+original.g+original.b)/3;if(brightness>.27&&n++%3===0){o.material.color.setHex(palettes[finish][0]);}}});
+}
+objects.push(item);return item}
+// Fixed furniture destination by function; general decorations follow chosen room.
+const preferredRooms={
+ bed:'bedroom',desk:'bedroom',wardrobe:'bedroom',nightstand:'bedroom',stool:'bedroom',vanity:'bedroom',mirror:'bedroom',ringlight:'bedroom',
+ sofa:'living',armchair:'living',coffee:'living',tv:'living',ps5:'living',chair:'living',monitor:'living',speaker:'living',
+ dining:'kitchen',diningchair:'kitchen',fridge:'kitchen',stove:'kitchen',sink:'kitchen',microwave:'kitchen',basecabinet:'kitchen',wallcabinet:'kitchen',pantry:'kitchen',dispenser:'kitchen',kettle:'kitchen',dishrack:'kitchen',trashbin:'kitchen',
+ bathmirror:'bathroom',livingmirror:'living',toilet:'bathroom',shower:'bathroom',bathtub:'bathroom',bathsink:'bathroom',towel:'bathroom',bathmat:'bathroom',bathcabinet:'bathroom'
+};
+function destinationRoom(type){const item=ITEMS.find(a=>a.id===type);return preferredRooms[type]||(item&&roomZones[item.cat]?item.cat:document.querySelector('#room').value)}
+// V17: animated camera destinations; both eye-level exploration and elevated build view.
+let cameraMode='build';let flyTarget=null;let savedBuildRoom='bedroom';
+function flyCamera(px,py,pz,tx,ty,tz){flyTarget={pos:new THREE.Vector3(px,py,pz),look:new THREE.Vector3(tx,ty,tz)};}
+function enterCameraMode(mode,key=document.querySelector('#room').value){
+ const r=roomZones[key];if(!r)return;
+ cameraMode=mode;
+ const inside=mode==='explore';
+ document.querySelector('#app').classList.toggle('exploring',inside);
+ document.querySelector('#explorePad').hidden=!inside;
+ document.querySelector('#camExplore').classList.toggle('current',inside);
+ document.querySelector('#camBuild').classList.toggle('current',mode==='build');
+ document.querySelector('#camWhole').classList.toggle('current',mode==='whole');
+ document.querySelector('#cameraHint').textContent=inside?'Explore Room: drag to look around, use WASD / arrow keys or the on-screen directional pad to move. Choose another room to enter it.':mode==='build'?'Build Mode: add items, select furniture and drag its blue arrows.':'Whole Apartment: view every room and choose one to enter.';
+ orbit.enablePan=!inside;orbit.enableRotate=true;orbit.enableZoom=true;
+ orbit.minDistance=inside?.5:4.2;orbit.maxDistance=inside?5:38;
+ orbit.minPolarAngle=inside?0.6:0;orbit.maxPolarAngle=inside?Math.PI/2.12:Math.PI/2.01;
+ if(inside){selected=null;syncGizmo();flyCamera(r.cx+0.2,1.7,r.cz+2.1,r.cx,1.55,r.cz-.8);}
+ else if(mode==='whole'){flyCamera(18,19,21,0,.6,0);}
+ else{flyCamera(r.cx+5.2,7.3,r.cz+6.5,r.cx,.7,r.cz);}
+}
+function showRoom(key){const r=roomZones[key];if(!r)return;document.querySelector('#room').value=key;enterCameraMode(cameraMode==='whole'?'build':cameraMode,key);}
+function moveExplore(direction){if(cameraMode!=='explore')return;const r=roomZones[document.querySelector('#room').value];const f=new THREE.Vector3().subVectors(orbit.target,camera.position);f.y=0;f.normalize();if(f.lengthSq()<.01)f.set(0,0,-1);const right=new THREE.Vector3().crossVectors(f,new THREE.Vector3(0,1,0)).normalize();const motion=new THREE.Vector3();if(direction==='forward')motion.copy(f);if(direction==='back')motion.copy(f).negate();if(direction==='left')motion.copy(right).negate();if(direction==='right')motion.copy(right);motion.multiplyScalar(.35);const next=camera.position.clone().add(motion);next.x=THREE.MathUtils.clamp(next.x,r.minX+.65,r.maxX-.65);next.z=THREE.MathUtils.clamp(next.z,r.minZ+.65,r.maxZ-.65);motion.set(next.x-camera.position.x,0,next.z-camera.position.z);camera.position.add(motion);orbit.target.add(motion);flyTarget=null;orbit.update();}
+for(const b of document.querySelectorAll('[data-walk]')){let repeat=null;b.addEventListener('pointerdown',e=>{e.preventDefault();moveExplore(b.dataset.walk);repeat=setInterval(()=>moveExplore(b.dataset.walk),110);try{b.setPointerCapture(e.pointerId)}catch(_){}});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>{clearInterval(repeat);repeat=null});}
+window.addEventListener('keydown',e=>{if(cameraMode!=='explore'||['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;const keys={w:'forward',ArrowUp:'forward',s:'back',ArrowDown:'back',a:'left',ArrowLeft:'left',d:'right',ArrowRight:'right'};if(keys[e.key]){e.preventDefault();moveExplore(keys[e.key]);}});
+document.querySelector('#camExplore').onclick=()=>enterCameraMode('explore');
+document.querySelector('#camBuild').onclick=()=>enterCameraMode('build');
+document.querySelector('#camWhole').onclick=()=>enterCameraMode('whole');
+
+function roomOf(x,z){return x<0?(z<0?'bedroom':'kitchen'):(z<0?'living':'bathroom')}
+function within(item,x,z){const r=Math.max(item.w,item.d)/2;const zone=roomZones[roomOf(x,z)];return x>=zone.minX+r&&x<=zone.maxX-r&&z>=zone.minZ+r&&z<=zone.maxZ-r}
+function collision(item,x,z){if(['rug','poster','bathmat'].includes(item.type))return false;return objects.some(o=>o!==item&&!['rug','poster','bathmat'].includes(o.type)&&Math.abs(o.x-x)<(o.w+item.w)*.43&&Math.abs(o.z-z)<(o.d+item.d)*.43)}
+function updateWallet(){document.querySelector('#wallet').textContent='$'+balance.toLocaleString()+' CAD'}function tell(s){status.textContent=s;help.textContent=s}function save(){try{localStorage.setItem('canadian-life-apartment-v13',JSON.stringify({balance,wall:document.querySelector('#wall').value,floor:document.querySelector('#floor').value,accent:document.querySelector('#accent').value,lighting:document.querySelector('#lighting').value,finish:document.querySelector('#finish').value,hunger,groceries,readyMeals,items:objects.map(o=>({type:o.type,x:o.x,z:o.z,rot:o.rot}))}))}catch(e){tell('Browser storage unavailable — room changes may not save.')}}function recolor(){
+ const wall=document.querySelector('#wall').value, accent=document.querySelector('#accent').value;
+ back.material.color.setHex(wallColors[accent==='match'?wall:accent]);left.material.color.setHex(wallColors[wall]);
+ const floorKind=document.querySelector('#floor').value;floor.material.color.setHex(0xffffff);floor.material.map=floorMaps[floorKind];floor.material.roughness=floorKind==='marble'?.25:floorKind==='carpet'?1:.73;floor.material.needsUpdate=true;for(const [name,m] of Object.entries(zoneFloors)){m.material.map=floorMaps[name==='bathroom'?'grey':name==='kitchen'?'marble':floorKind];m.material.color.setHex(0xffffff);m.material.needsUpdate=true;}
+ const light=lightingStyles[document.querySelector('#lighting').value];sun.intensity=light.sun;sun.color.setHex(light.tint);ambient.intensity=light.ambient;scene.background.setHex(light.sky);save();
+}
+for(const id of ['wall','accent','floor','lighting'])document.querySelector('#'+id).addEventListener('change',recolor);
+document.querySelector('#finish').addEventListener('change',save);
+const themes={cozy:{wall:'cream',accent:'beige',floor:'wood',lighting:'cozy',finish:'natural'},luxury:{wall:'white',accent:'charcoal',floor:'marble',lighting:'luxury',finish:'midnight'},creator:{wall:'pink',accent:'white',floor:'carpet',lighting:'day',finish:'rose'},gaming:{wall:'grey',accent:'charcoal',floor:'dark',lighting:'modern',finish:'midnight'}};
+document.querySelectorAll('[data-theme]').forEach(b=>b.addEventListener('click',()=>{for(const [k,v] of Object.entries(themes[b.dataset.theme]))document.querySelector('#'+k).value=v;recolor();tell(b.textContent.trim()+' theme applied! Now make it your own.')}));
+function highlight(){syncGizmo();const picker=document.querySelector('#itemPicker');const current=selected?String(selected.id):'';picker.innerHTML='<option value="">Choose an item in your room</option>';objects.forEach((o,i)=>{const opt=document.createElement('option');opt.value=String(o.id);opt.textContent=(i+1)+'. '+ITEMS.find(t=>t.id===o.type).name;picker.append(opt)});picker.value=current;for(let o of objects)o.g.traverse(n=>{if(n.isMesh&&n.material.emissive)n.material.emissive.setHex(o===selected?0x153c4c:0x000000)});document.querySelector('#selectedInfo').textContent=selected?ITEMS.find(a=>a.id===selected.type).name+' — click Move selected to reposition, or use arrow keys':'Nothing selected';document.querySelector('#rotate').disabled=!selected;document.querySelector('#remove').disabled=!selected;document.querySelector('#moveSelected').disabled=!selected;document.querySelector('#rotateFine').disabled=!selected}function setMode(m){mode=m;syncGizmo();document.querySelector('#modeSelect').classList.toggle('active',m==='select');document.querySelector('#modePlace').classList.toggle('active',m==='place');document.querySelector('#modeMove').classList.toggle('active',m==='move');orbit.enabled=true;help.textContent=m==='place'?'Click an open floor spot to purchase and place your item.':m==='move'?'Click anywhere inside the room to move the selected furniture.':'Select an item, then drag its BLUE arrows to move it. Drag empty floor to rotate the camera.'}function addFromCatalog(typeId){
+  const itemType=ITEMS.find(i=>i.id===typeId);
+  if(!itemType)return;
+  if(balance<itemType.price){tell('Not enough in-game money for '+itemType.name+'.');return;}
+  const fake={w:itemType.w,d:itemType.d,type:itemType.id};
+  // Seek free spots across the entire room, rather than requiring a precise floor tap.
+  let spot=null;
+  const destination=destinationRoom(typeId);const room=roomZones[destination];const order=[[room.cx,room.cz]];for(let z=room.minZ+.6;z<=room.maxZ-.6;z+=.55)for(let x=room.minX+.6;x<=room.maxX-.6;x+=.55)order.push([x,z]);
+  for(const [x,z] of order){if(roomOf(x,z)===destination&&within(fake,x,z)&&!collision(fake,x,z)){spot=[x,z];break;}}
+  if(!spot){tell('The '+room.name+' is full. Move or remove an item there first.');return;}
+  showRoom(destination);
+  const placed=makeItem(typeId,spot[0],spot[1]);
+  balance-=itemType.price;
+  pending=null;
+  selected=placed;
+  updateWallet();save();setMode('select');highlight();cards();
+  tell(itemType.name+' added to the '+room.name+'! Use the blue arrows or movement pad to rearrange it.');
+}
+function cards(){catalog.innerHTML='';for(let a of ITEMS.filter(o=>category==='all'||o.cat===category)){let b=document.createElement('button');b.className='item'+(pending===a.id?' selected':'');b.innerHTML='<span class="emoji">'+a.icon+'</span><strong>'+a.name+'</strong><small>$'+a.price+' CAD</small>';b.onclick=()=>addFromCatalog(a.id);catalog.append(b)}}document.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;document.querySelectorAll('[data-category]').forEach(t=>t.classList.toggle('active',t===b));cards()});document.querySelector('#modeSelect').onclick=()=>{pending=null;cards();setMode('select')};document.querySelector('#modePlace').onclick=()=>{if(!pending)pending='bed';cards();setMode('place')};document.querySelector('#cancel').onclick=()=>{pending=null;selected=null;highlight();setMode('select');cards()};document.querySelector('#modeMove').onclick=()=>{if(!selected){tell('Select an item in the room first, then click Move.');return}setMode('move');tell('Click an open spot on the floor to MOVE '+ITEMS.find(a=>a.id===selected.type).name+'.')};document.querySelector('#moveSelected').onclick=()=>document.querySelector('#modeMove').click();document.querySelector('#itemPicker').addEventListener('change',e=>{selected=objects.find(o=>String(o.id)===e.target.value)||null;pending=null;highlight();setMode('select');if(selected)tell('Selected '+ITEMS.find(t=>t.id===selected.type).name+'. Drag the BLUE arrows on the item with a mouse or finger.');});document.querySelector('#rotateFine').onclick=()=>rotateSelected(Math.PI/4);function rotateSelected(angle){if(!selected){tell('Select an item first.');return}selected.rot=(selected.rot+angle)%(Math.PI*2);selected.g.rotation.y=selected.rot;save();tell('Furniture rotated.')}document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{if(!selected){tell('Select an item first.');return}const [dx,dz]=b.dataset.nudge.split(',').map(Number);const x=selected.x+dx,z=selected.z+dz;if(roomOf(x,z)!==roomOf(selected.x,selected.z)||!within(selected,x,z)||collision(selected,x,z)){tell('Not enough space in that direction.');return}selected.x=x;selected.z=z;selected.g.position.set(x,0,z);save();tell('Moved furniture.');});document.querySelector('#zoomHelp').onclick=()=>tell('Drag empty space to orbit. Scroll to zoom. Select an item to move or rotate it.');document.querySelector('#rotate').onclick=()=>rotateSelected(Math.PI/2);document.querySelector('#remove').onclick=()=>{if(!selected)return;let price=ITEMS.find(i=>i.id===selected.type).price;balance+=price;scene.remove(selected.g);objects.splice(objects.indexOf(selected),1);selected=null;highlight();updateWallet();save();tell('Item removed and price refunded.')};document.querySelector('#reset').onclick=()=>{if(!confirm('Reset room and return your full $5,000 starting balance?'))return;for(let o of objects)scene.remove(o.g);objects.length=0;selected=null;pending=null;balance=5000;hunger=40;groceries=0;readyMeals=0;document.querySelector('#wall').value='cream';document.querySelector('#floor').value='wood';document.querySelector('#accent').value='match';document.querySelector('#lighting').value='day';document.querySelector('#finish').value='natural';highlight();setMode('select');cards();recolor();updateWallet();tell('Room reset. Start decorating again!')};document.querySelector('#toggle').onclick=()=>document.querySelector('#panel').classList.toggle('hide');
+
+const roomSelect=document.querySelector('#room');
+roomSelect.addEventListener('change',()=>{showRoom(roomSelect.value);tell('Viewing '+roomZones[roomSelect.value].name+'. Furniture automatically goes to its proper room; décor follows your selected room.');});
+document.querySelector('#overview').addEventListener('click',()=>{enterCameraMode('whole');tell('Whole apartment view — choose Explore Room or Build Mode.');});
+let hygiene=35;
+document.querySelector('#showerAction').addEventListener('click',()=>{if(!objects.some(o=>o.type==='shower'&&roomOf(o.x,o.z)==='bathroom')){tell('Buy a Glass Shower and place it in the bathroom first.');return;}hygiene=100;document.querySelector('#needs').textContent='Character hygiene: 100% ✨ Shower complete (prototype — character animation comes later).';tell('Shower complete! Your character is refreshed. This is a basic needs interaction; there is no animation yet.');});
+
+// At-home interactions — player-triggered actions, not character animations.
+let energy=55,thirst=45;
+function homeStatus(){document.querySelector('#homeStatus').textContent=`Energy: ${energy}% · Hygiene: ${hygiene}% · Thirst: ${thirst}%`;}
+function hasFurniture(type,room){return objects.some(o=>o.type===type&&roomOf(o.x,o.z)===room)}
+function doHomeActivity(type,room,needsFurniture,verb,action){
+  if(!hasFurniture(type,room)){tell(`Buy ${needsFurniture} from the furniture catalogue first.`);return;}
+  roomSelect.value=room;showRoom(room);action();homeStatus();save();tell(`${verb} completed! Your character's needs have been updated (prototype interaction).`);
+}
+document.querySelector('#sleepAction').onclick=()=>doHomeActivity('bed','bedroom','a Cozy Bed','Sleep',()=>{energy=100;hunger=Math.max(0,hunger-5);updateFood()});
+document.querySelector('#toiletAction').onclick=()=>doHomeActivity('toilet','bathroom','a Toilet','Toilet visit',()=>{hygiene=Math.max(0,hygiene-8)});
+document.querySelector('#washAction').onclick=()=>doHomeActivity('bathsink','bathroom','a Bathroom Vanity','Handwashing',()=>{hygiene=Math.min(100,hygiene+18)});
+document.querySelector('#drinkAction').onclick=()=>doHomeActivity('dispenser','kitchen','a Water Dispenser','Drinking water',()=>{thirst=100});
+// Also refresh needs when using the existing shower interaction.
+document.querySelector('#showerAction').addEventListener('click',homeStatus);
+homeStatus();
+
+// Cooking mini-game — independent of the decorating selection/movement controls.
+const RECIPES={pasta:{name:'Tomato Pasta',cost:2,restore:30},rice:{name:'Jollof-style Rice',cost:3,restore:45},eggs:{name:'Eggs & Toast',cost:1,restore:20}};
+const foodStatus=document.querySelector('#foodStatus');
+function updateFood(){
+  foodStatus.textContent=`Hunger: ${hunger}% · Ingredient portions: ${groceries} · Ready meals: ${readyMeals}`+(cooking?' · Cooking…':'');
+  document.querySelector('#cookAction').disabled=cooking;
+  document.querySelector('#eatAction').disabled=cooking||readyMeals===0;
+  document.querySelector('#buyGroceries').disabled=cooking;
+}
+function hasKitchenStove(){return objects.some(o=>o.type==='stove'&&roomOf(o.x,o.z)==='kitchen');}
+document.querySelector('#goKitchen').onclick=()=>{roomSelect.value='kitchen';showRoom('kitchen');tell('Welcome to your kitchen! Buy a Cooker / Stove to unlock recipes.');};
+document.querySelector('#buyGroceries').onclick=()=>{
+  if(balance<35){tell('You need $35 of in-game money for groceries.');return;}
+  balance-=35;groceries+=6;updateWallet();updateFood();save();tell('Bought groceries! +6 ingredient portions. Choose a recipe and cook.');
+};
+document.querySelector('#cookAction').onclick=()=>{
+  const recipe=RECIPES[document.querySelector('#recipe').value];
+  if(cooking)return;
+  if(!hasKitchenStove()){tell('Purchase a Cooker / Stove in the Kitchen section first.');return;}
+  if(groceries<recipe.cost){tell(`${recipe.name} needs ${recipe.cost} ingredient portions. Buy groceries first.`);return;}
+  groceries-=recipe.cost;cooking=true;roomSelect.value='kitchen';showRoom('kitchen');updateFood();save();
+  tell(`Cooking ${recipe.name}… please wait a few seconds.`);
+  window.setTimeout(()=>{readyMeals++;cooking=false;updateFood();save();tell(`${recipe.name} is ready! Press Eat meal to restore hunger.`);},3500);
+};
+document.querySelector('#eatAction').onclick=()=>{
+  if(!readyMeals)return;
+  readyMeals--;hunger=Math.min(100,hunger+30);updateFood();save();tell('Delicious! Your character ate a home-cooked meal. Hunger restored.');
+};
+
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),ground=new THREE.Plane(new THREE.Vector3(0,1,0),0);function point(evt){const r=renderer.domElement.getBoundingClientRect();mouse.set((evt.clientX-r.left)/r.width*2-1,-(evt.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);return ray.ray.intersectPlane(ground,new THREE.Vector3())}function hit(evt){const r=renderer.domElement.getBoundingClientRect();mouse.set((evt.clientX-r.left)/r.width*2-1,-(evt.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);for(let v of ray.intersectObjects(objects.map(x=>x.g),true)){if(v.object.userData.item)return v.object.userData.item}return null}
+// Single pointer system: TransformControls owns arrow dragging; furniture clicks select only.
+// This avoids pointer-capture conflicts between the camera, furniture, and 3D arrows.
+let pointerStart=null;
+document.querySelector('#padRotate').onclick=()=>rotateSelected(Math.PI/4);
+const canvas=renderer.domElement;
+canvas.style.touchAction='none';
+canvas.addEventListener('pointerdown',e=>{
+  if(e.button!==0&&e.pointerType==='mouse')return;
+  pointerStart={x:e.clientX,y:e.clientY,id:e.pointerId};
+  if(mode!=='select')orbit.enabled=false;
+});
+canvas.addEventListener('pointerup',e=>{
+  if(gizmoDragging||gizmo.axis){pointerStart=null;return;}
+  if(!pointerStart||pointerStart.id!==e.pointerId)return;
+  const click=Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y)<12;
+  pointerStart=null;
+  if(!click)return;
+  if(mode==='select'){
+    const picked=hit(e);
+    if(picked){selected=picked;highlight();tell('Selected '+ITEMS.find(i=>i.id===picked.type).name+'. Drag a blue arrow, or use the blue movement pad below.');}
+  }else{
+    placeAtClick(e);
+  }
+  orbit.enabled=true;
+});
+canvas.addEventListener('pointercancel',()=>{pointerStart=null;if(!gizmoDragging)orbit.enabled=true});
+// Repeatable touch controls are reliable on phones, tablets, laptops and trackpads.
+function moveBy(dx,dz){
+  if(!selected){tell('Select furniture first to use the movement arrows.');return}
+  const x=selected.x+dx,z=selected.z+dz;
+  if(roomOf(x,z)!==roomOf(selected.x,selected.z)||!within(selected,x,z)||collision(selected,x,z)){
+    tell('This direction is blocked by the wall or another object.');return
+  }
+  selected.x=x;selected.z=z;selected.g.position.set(x,0,z);
+  save();
+}
+let holdTimeout=null,holdInterval=null;
+function clearHold(){clearTimeout(holdTimeout);clearInterval(holdInterval);holdTimeout=null;holdInterval=null;}
+for(const btn of document.querySelectorAll('[data-pad]')){
+  btn.addEventListener('pointerdown',e=>{
+    e.preventDefault();const [dx,dz]=btn.dataset.pad.split(',').map(Number);
+    moveBy(dx,dz);
+    clearHold();holdTimeout=setTimeout(()=>{holdInterval=setInterval(()=>moveBy(dx,dz),75)},280);
+    try{btn.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  for(const event of ['pointerup','pointercancel','lostpointercapture','pointerleave'])btn.addEventListener(event,clearHold);
+}
+try{let s=JSON.parse(localStorage.getItem('canadian-life-apartment-v13')||'null');if(s){hunger=Number.isFinite(s.hunger)?Math.max(0,Math.min(100,s.hunger)):40;groceries=Number.isFinite(s.groceries)?Math.max(0,s.groceries):0;readyMeals=Number.isFinite(s.readyMeals)?Math.max(0,s.readyMeals):0;balance=Number.isFinite(s.balance)?s.balance:5000;if(wallColors[s.wall])document.querySelector('#wall').value=s.wall;if(floorColors[s.floor])document.querySelector('#floor').value=s.floor;if(s.accent&&(s.accent==='match'||wallColors[s.accent]))document.querySelector('#accent').value=s.accent;if(lightingStyles[s.lighting])document.querySelector('#lighting').value=s.lighting;if(['natural','rose','midnight','sage'].includes(s.finish))document.querySelector('#finish').value=s.finish;for(let o of (s.items||[]).slice(0,70)){if(ITEMS.some(t=>t.id===o.type)&&Number.isFinite(o.x)&&Number.isFinite(o.z))makeItem(o.type,o.x,o.z,o.rot||0)}}}catch(e){}recolor();updateWallet();updateFood();cards();highlight();setMode('select');enterCameraMode('build');function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(view);resize();renderer.setAnimationLoop(()=>{if(flyTarget){camera.position.lerp(flyTarget.pos,.085);orbit.target.lerp(flyTarget.look,.085);if(camera.position.distanceTo(flyTarget.pos)<.06&&orbit.target.distanceTo(flyTarget.look)<.06)flyTarget=null;}orbit.update();renderer.render(scene,camera)});
+</script></body></html>
